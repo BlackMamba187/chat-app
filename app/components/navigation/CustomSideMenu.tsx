@@ -121,7 +121,7 @@ const CustomSideMenu = (props: any) => {
 					</Text>
 				</View>
 				<TouchableOpacity
-					onPress={() => {}}
+					onPress={() => Auth.signOut()}
 					style={{
 						flexDirection: "row",
 						alignItems: "center",
