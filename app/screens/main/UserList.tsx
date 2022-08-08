@@ -13,22 +13,30 @@ import React, { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { DarkMode } from "../../recoil/Atoms";
 import Colors from "../../theme/Colors";
-import { API, graphqlOperation } from "aws-amplify";
+import { API, Auth, graphqlOperation } from "aws-amplify";
 import { listUsers } from "../../../src/graphql/queries";
 import UserListItem from "../../components/userListItem/UserListItem";
 
 const UserList = () => {
 	const darkMode = useRecoilValue(DarkMode);
 
-	const [users, setUser] = useState();
+	const [users, setUser] = useState<any>();
 	const [search, setSearch] = useState("");
 	const [Searchedusers, setSearchedUser] = useState();
 
 	useEffect(() => {
 		const fetchUsers = async () => {
+			const userInfo = await Auth.currentAuthenticatedUser({
+				bypassCache: true,
+			});
+			
 			try {
 				const result = await API.graphql(graphqlOperation(listUsers));
-				setUser(result.data.listUsers.items);
+				const list =result.data.listUsers.items
+
+				const item = list.filter((item: { id: number; }) => item.id !== userInfo.attributes.sub)
+
+				setUser(item)
 			} catch (err) {
 				console.log(err);
 			}
@@ -48,6 +56,17 @@ const UserList = () => {
 				}}
 			>
 				<View>
+				<Text
+					style={{
+						margin: 20,
+						fontWeight: "bold",
+						fontSize: 20,
+						alignSelf: "center",
+						color: darkMode ? Colors.white : Colors.black,
+					}}
+				>
+					All Users
+				</Text>
 					<FlatList
 						data={users}
 						renderItem={({ item }) => <UserListItem user={item} navigation={undefined}  />}

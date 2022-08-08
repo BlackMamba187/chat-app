@@ -80,7 +80,14 @@ const ChatRoomPage = ({ route }: Props) => {
 				}}
 				contentContainerStyle={{ minHeight: "100%" }}
 			>
-        <Text style={styles.sectionTitle}>{chatRoomID}</Text>
+				<Text
+					style={[
+						styles.sectionTitle,
+						{ color: darkMode ? Colors.white: Colors.black },
+					]}
+				>
+					{chatRoomID}
+				</Text>
 				{messages.map(
 					(
 						item: {
@@ -110,8 +117,6 @@ const ChatRoomPage = ({ route }: Props) => {
 						</View>
 					)
 				)}
-
-				
 			</ScrollView>
 			<View
 				style={{

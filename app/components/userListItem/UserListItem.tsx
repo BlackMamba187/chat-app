@@ -5,7 +5,7 @@ import {
 	Image,
 	View,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { API, graphqlOperation, Auth } from "aws-amplify";
 import {
 	createChatRoom,
@@ -17,51 +17,99 @@ import { MainStackParams } from "../../screens/mainStack/MainStack";
 import { useRecoilValue } from "recoil";
 import { DarkMode } from "../../recoil/Atoms";
 import Colors from "../../theme/Colors";
+import { getUser } from "../../../src/graphql/queries";
 
 const UserListItem = ({ user }: any) => {
 	const navigation = useNavigation();
 
 	const darkMode = useRecoilValue(DarkMode);
+	const [authUserChatrooms, setAuthUserChatrooms] = useState([]);
+	const [otherUserChatrooms, setOtherUserChatrooms] = useState([]);
 
 	const onClick = async () => {
-		try {
-			//  1. Create a new Chat Room
-			const newChatRoomData = await API.graphql(
-				graphqlOperation(createChatRoom, {
-					input: {},
-				})
-			);
+		const userInfo = await Auth.currentAuthenticatedUser({
+			bypassCache: true,
+		});
 
-			if (!newChatRoomData.data) {
-				console.log(" Failed to create a chat room");
-				return;
+		const userData = await API.graphql(
+			graphqlOperation(getUser, { id: userInfo.attributes.sub })
+		);
+
+		const chatRooms = userData.data.getUser.chatRoom.items.map(function (id: {
+			chatRoomID: any;
+		}) {
+			return id.chatRoomID;
+		});
+
+		setAuthUserChatrooms(chatRooms);
+
+		const otherUser = await API.graphql(
+			graphqlOperation(getUser, { id: user.id })
+		);
+
+		const chatRoomsOtherUser = otherUser.data.getUser.chatRoom.items.map(
+			function (id: { chatRoomID: any }) {
+				return id.chatRoomID;
 			}
+		);
 
-			const newChatRoom = newChatRoomData.data.createChatRoom;
+		setOtherUserChatrooms(chatRoomsOtherUser);
 
-			// 2. Add `user` to the Chat Room
-			await API.graphql(
-				graphqlOperation(createChatRoomUser, {
-					input: {
-						userID: user.id,
-						chatRoomID: newChatRoom.id,
-					},
-				})
-			);
+		//Find if you have a chat with user before you make another one
+		const match = authUserChatrooms.filter((val) => {
+			return otherUserChatrooms.find((a) => {
+				return val === a;
+			});
+		});
+		const matchingVaule = match.toString();
 
-			//  3. Add authenticated user to the Chat Room
-			const userInfo = await Auth.currentAuthenticatedUser();
-			await API.graphql(
-				graphqlOperation(createChatRoomUser, {
-					input: {
-						userID: userInfo.attributes.sub,
-						chatRoomID: newChatRoom.id,
-					},
-				})
-			);
-			navigation.navigate("ChatRoomPage", { id: newChatRoom.id });
-		} catch (e) {
-			console.log(e);
+		if (matchingVaule !== "") {
+			try {
+				navigation.navigate("ChatRoomPage", { id: matchingVaule });
+			} catch (e) {
+				console.log(e);
+			}
+		} else  {
+			if(matchingVaule == ""){
+				try {
+					//  1. Create a new Chat Room
+					const newChatRoomData = await API.graphql(
+						graphqlOperation(createChatRoom, {
+							input: {},
+						})
+					);
+		
+					if (!newChatRoomData.data) {
+						console.log(" Failed to create a chat room");
+						return;
+					}
+		
+					const newChatRoom = newChatRoomData.data.createChatRoom;
+		
+					// 2. Add `user` to the Chat Room
+					await API.graphql(
+						graphqlOperation(createChatRoomUser, {
+							input: {
+								userID: user.id,
+								chatRoomID: newChatRoom.id,
+							},
+						})
+					);
+		
+					//  3. Add authenticated user to the Chat Room
+					await API.graphql(
+						graphqlOperation(createChatRoomUser, {
+							input: {
+								userID: userInfo.attributes.sub,
+								chatRoomID: newChatRoom.id,
+							},
+						})
+					);
+					navigation.navigate("ChatRoomPage", { id: newChatRoom.id });
+				} catch (e) {
+					console.log(e);
+				}
+			}
 		}
 	};
 

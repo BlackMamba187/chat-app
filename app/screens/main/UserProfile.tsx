@@ -79,18 +79,6 @@ const UserProfile = ({ route }: Props) => {
 							
 						</View>
 					</ImageBackground>
-					<View>
-						<Text
-							style={{
-								alignSelf: "center",
-								color: Colors.primary,
-								padding: 10,
-							}}
-						>
-							Add Bio
-						</Text>
-					</View>
-
 					<Card title={"current user name"} Userattribute={name} />
 					<Card title={"current email address"} Userattribute={email} />
 					<Card title={"current phone number"} Userattribute={phone} />

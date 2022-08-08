@@ -30,6 +30,7 @@ const ChatList = ({ navigation }: Props) => {
 
 	const [userChatroom, setUserChatroom] = useState([]);
 
+
 	useEffect(() => {
 		const fetchChatRooms = async () => {
 			try {
