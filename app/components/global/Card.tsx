@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View} from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
 import { Colors } from "react-native-paper";
 import { useRecoilValue } from "recoil";
@@ -16,33 +16,41 @@ const Card = ({ title, Userattribute }: Props) => {
 
 	const toggleEdit = () => setEdit(!edit);
 
-
-
 	return (
-		<View
-			style={{ padding: 10, paddingHorizontal: 30, }}
-          
-		>
+		<View style={{ padding: 10, paddingHorizontal: 30 }}>
 			<Text
-				style={{
-					color: darkMode ? Colors.white : Colors.black,
-					flex: 1,
-					justifyContent: "center",
-					alignItems: "center",
-					fontSize: 18,
-					marginBottom: 5,
-					padding: 5,
-				}}
+				style={[
+					styles.userText,
+					{
+						color: darkMode ? Colors.white : Colors.black,
+					},
+				]}
 			>
 				{title}:
 			</Text>
-			<TextInput editable={edit} placeholder={Userattribute} />
+			<Text
+				style={[
+					styles.userText,
+					{
+						color: darkMode ? Colors.white : Colors.black,
+					},
+				]}
+			>
+				{Userattribute}
+			</Text>
 		</View>
 	);
 };
 
 export default Card;
 
-const styles = StyleSheet.create({});
-
-
+const styles = StyleSheet.create({
+	userText: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		fontSize: 18,
+		marginBottom: 5,
+		padding: 5,
+	},
+});
